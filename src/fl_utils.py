@@ -551,7 +551,9 @@ def read_condition(file_name):
 def plot_single_converg(args, save_path, file_name, if_loss=True):
     # 读取CSV文件
     index_values, losses_train, accuracies_train, accuracies_test = read_converg(file_name)
-
+    font_size = 30
+    rcParams.update({'font.size': font_size, 'font.family': 'Times New Roman'})
+    
     # 示例输出
     if if_loss:
         plt.plot(index_values, losses_train, label='Losses Train', marker='o',markevery=args.markevery)
