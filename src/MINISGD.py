@@ -47,15 +47,17 @@ class Server:
     # 梯度聚合
     def aggregate(self, gradients, alpha):
         avg_gradients = copy.deepcopy(gradients[0])
+        for key in avg_gradients.keys():
+            avg_gradients[key] = torch.zeros_like(avg_gradients[key])
+
         alpha_weight = [self.N_us[i]*alpha[i] for i in range(len(gradients))]
         alpha_weight = [i/sum(alpha_weight) for i in alpha_weight]
         if torch.all(alpha==0):
             print('alpha all zero')
-            for key in avg_gradients.keys():
-                avg_gradients[key] = torch.zeros_like(avg_gradients[key])
+            
         else:
             for key in avg_gradients.keys():
-                for i in range(1, len(gradients)):
+                for i in range(len(gradients)):
                     avg_gradients[key] += gradients[i][key]*alpha_weight[i]
                 # avg_gradients[key] = torch.div(avg_gradients[key], sum(alpha))
         

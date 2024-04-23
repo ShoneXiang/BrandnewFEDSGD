@@ -43,18 +43,33 @@ class Server:
     # 梯度聚合
     def aggregate(self, w, alpha):
         w_avg = copy.deepcopy(w[0])
+        for key in w_avg.keys():
+            w_avg[key] = torch.zeros_like(w_avg[key])
+
         alpha_weight = [self.N_us[i]*alpha[i] for i in range(len(w))]
         alpha_weight = [i/sum(alpha_weight) for i in alpha_weight]
         if torch.all(alpha==0):
             print('alpha all zero')
-            for key in w_avg.keys():
-                w_avg[key] = torch.zeros_like(w_avg[key])
+            
         else:
             for key in w_avg.keys():
-                for i in range(1, len(w)):
-                    w_avg[key] += w[i][key]*torch.tensor(alpha_weight)[i]
+                for i in range(len(w)):
+                    w_avg[key] += w[i][key]*alpha_weight[i]
                 # w_avg[key] = torch.div(w_avg[key], sum(alpha))
         return w_avg
+
+        # w_avg = copy.deepcopy(w[0])
+        # if torch.all(alpha==0):
+        #     print('alpha all zero')
+        #     for key in w_avg.keys():
+        #         w_avg[key] = torch.zeros_like(w_avg[key])
+        # else:
+        #     for key in w_avg.keys():
+        #         for i in range(1, len(w)):
+        #             w_avg[key] += w[i][key]*alpha[i]
+        #         w_avg[key] = torch.div(w_avg[key], sum(alpha))
+        # return w_avg
+
     # 梯度下降更新模型参数
     def update(self, avg_weights):
         # with torch.no_grad():

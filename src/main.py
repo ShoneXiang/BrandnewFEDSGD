@@ -33,7 +33,7 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 parser = argparse.ArgumentParser(description='Example script with global variable.')
 
-parser.add_argument('--dataset', type=str, help='dataset, cifar或者minst', default='mnist')
+parser.add_argument('--dataset', type=str, help='dataset, cifar或者mnist', default='mnist')
 parser.add_argument('--model', type=str, help='model, cnn(cifar的cnn 343946个参数)或者mlp(50890个参数)', default='mlp')
 parser.add_argument('--if_batch', type=int, help='是否使用minibatchgd', default=0)
 parser.add_argument('--if_prune', type=int, help='是否prune', default=0)
@@ -46,7 +46,7 @@ parser.add_argument('--loss_func', type=str, help='loss_func, 可以为crossentr
 parser.add_argument('--local_bs', type=int, help='local_bs', default=290)
 parser.add_argument('--local_ep', type=int, help='local_ep', default=1)
 parser.add_argument('--optimizer', type=str, help='optimizer, 可以为sgd或adam', default='sgd')
-parser.add_argument('--num_epoch', type=int, help='num_epoch', default=200)   # num_epoch是每轮全局迭代的最大轮次  
+parser.add_argument('--num_epoch', type=int, help='num_epoch', default=100)   # num_epoch是每轮全局迭代的最大轮次  
 parser.add_argument('--mean_datanum', type=int, help='节点平均的数据量', default=300)
 
 parser.add_argument('--wer', type=float, help='wer', default=0.0065)    # wer是信道条件Rayleigh fading factor
