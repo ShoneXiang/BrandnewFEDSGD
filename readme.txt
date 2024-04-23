@@ -2,4 +2,4 @@
     生成指令：pip freeze > requirements.txt
     安装指令：pip install -r requirements.txt
 2. 检查github是否链接远程库：git remote -v
-test
+test 2
