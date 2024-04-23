@@ -575,6 +575,9 @@ def plot_multi_converg(args, save_path, file_fedsgd, file_signsgd, file_fedavg, 
     index_values_fedavg, losses_train_fedavg, accuracies_train_fedavg, accuracies_test_fedavg = read_converg(file_fedavg)
     index_values_proposed, losses_train_proposed, accuracies_train_proposed, accuracies_test_proposed = read_converg(file_proposed)
 
+    font_size = 30
+    rcParams.update({'font.size': font_size, 'font.family': 'Times New Roman'})
+
     # 示例输出
     
     plt.figure()
