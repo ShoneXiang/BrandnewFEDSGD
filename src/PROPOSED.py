@@ -47,6 +47,9 @@ class Server:
     # 梯度聚合
     def aggregate(self, gradients, alpha):
         avg_gradients = copy.deepcopy(gradients[0])
+        for key in avg_gradients.keys():
+            avg_gradients[key] = torch.zeros_like(avg_gradients[key])
+
         alpha_weight = [self.N_us[i]*alpha[i] for i in range(len(gradients))]
         alpha_weight = [i/sum(alpha_weight) for i in alpha_weight]
         if torch.all(alpha==0):
@@ -73,6 +76,23 @@ class Server:
         
         return avg_gradients
 
+    def aggregate_SCG(self, deltas, alpha):
+        new_list = []
+        num_clients = len(deltas)
+        for j in range(len(deltas[0])):
+            new_sub_list = [sub_l[j] for sub_l in deltas]
+            new_list.append(new_sub_list)
+
+        stacked_grads = [torch.stack(sublist) for sublist in new_list]
+
+        if torch.all(alpha==0):
+            agg_delta = [torch.sum(grad*alpha.reshape(num_clients,1).view((num_clients,)+(1,)*(len(grad.shape)-1)),dim=0) for grad in stacked_grads]
+        else:
+            agg_delta = [torch.sum(grad*alpha.reshape(num_clients,1).view((num_clients,)+(1,)*(len(grad.shape)-1))*torch.tensor(self.N_us).reshape(num_clients,1).view((num_clients,)+(1,)*(len(grad.shape)-1)).to(self.device),dim=0)/torch.sum(alpha*torch.tensor(self.N_us).to(self.device)).item() for grad in stacked_grads]
+        
+        return agg_delta
+
+
     # 梯度下降更新模型参数
     def update(self, avg_gradients):
         # with torch.no_grad():
@@ -90,6 +110,11 @@ class Server:
         for key in global_weights.keys():
             global_weights[key] -= self.learning_rate * avg_gradients[key]
         self.model.load_state_dict(global_weights)
+
+    def update_SCG(self, avg_deltas): 
+        self.model.train()   
+        for param, dt in zip(self.model.parameters(), avg_deltas):
+                        param.data.add_(dt)   # Update parameters
 
     # 测试准确率
     def test(self):
@@ -276,9 +301,21 @@ class Client:
 
                 self.model.zero_grad()
                 log_probs = self.model(images)
+
                 loss = self.criterion(log_probs, labels)
                 loss.backward()
 
+                # SCG 
+                if batch_idx == 0:
+                    gold = [copy.deepcopy(parm.grad) for parm in self.model.parameters()]
+                    delta = [torch.zeros_like(parm.grad) for parm in self.model.parameters()]
+
+                # Compute conjugate gradient direction
+                with torch.no_grad():
+                    gnew = [parm.grad for parm in self.model.parameters()]
+                    beta = [((gn**2).sum()/(go**2).sum()).item() for gn, go in zip(gnew, gold)]
+                    delta = [-gn + bet * d for gn, bet, d in zip(gnew, beta, delta)]
+                    
                 # Accumulate gradients for each parameter
                 if args.if_prune:
                     for name, param in self.model.named_parameters():
@@ -298,6 +335,12 @@ class Client:
         g_mins = [epoch_gradients[name].min().cpu() for name, param in self.model.named_parameters()]
         g_max = max(g_maxs)
         g_min = min(g_mins)
+
+        d_maxs = [delta[i].max().cpu() for i in range(len(delta))]   # 此处的d_max为当前client各分量的上界列表
+        d_mins = [delta[i].min().cpu() for i in range(len(delta))]
+        d_max = max(d_maxs)
+        d_min = min(d_mins)
+
         # gradients = [self.quantize(p.grad.data, g_max, g_min) for p in self.model.parameters()]  # p为遍历g_u的每一个分量
         if args.if_quantize:
             for name in epoch_gradients.keys():
@@ -339,7 +382,10 @@ class Client:
         # self.re_prune(self.model)                        # 剪枝
         # return gradients
         # print(g_max, max(q_max))
-        return epoch_gradients, sum(epoch_loss) / len(epoch_loss), g_max, g_min, q_max, xi, accuracy
+        if args.if_SCG:
+            return delta, sum(epoch_loss) / len(epoch_loss), g_max, g_min, q_max, xi, accuracy
+        else:
+            return epoch_gradients, sum(epoch_loss) / len(epoch_loss), g_max, g_min, q_max, xi, accuracy
     
 
 def PROPOSED(args, test_dataset, train_dataset, user_groups, N_us, file_path, transmit_power, bitwidths, prune_rates, computing_resources, I_us, h_us):
@@ -477,8 +523,12 @@ def PROPOSED(args, test_dataset, train_dataset, user_groups, N_us, file_path, tr
         fl_utils.generate_alpha(alpha, transmit_power, args.num_clients, I_us, h_us, args.B_u, args.N0, args.waterfall_thre)
             
         # 服务器操作（梯度聚合+更新）
-        agg_grads = server.aggregate(gradients=local_gradient, alpha=alpha.to(device))   # 梯度聚合   
-        server.update(avg_gradients=agg_grads)                                                           # 梯度更新
+        if args.if_SCG:
+            agg_deltas = server.aggregate_SCG(deltas=local_gradient, alpha=alpha.to(device))
+            server.update_SCG(avg_deltas=agg_deltas)
+        else:
+            agg_grads = server.aggregate(gradients=local_gradient, alpha=alpha.to(device))   # 梯度聚合   
+            server.update(avg_gradients=agg_grads)                                                           # 梯度更新
         
         #------------------测试-------------------------------
         acc_test = server.test()

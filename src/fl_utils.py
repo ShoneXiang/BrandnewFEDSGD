@@ -308,13 +308,13 @@ def Save_to_Csv(data, file_name, Save_format = 'csv', Save_type = 'col', file_pa
 # Emin_ref = k*(3e7)**2*min(N_us)*c0+(1*V+64+V)*power_min/data_rate(power_max,B_u,h_max,N0,I_min)
 # print(f'当前T范围:({Tmin_ref},{Tmax_ref}), 当前E范围:({Emin_ref},{Emax_ref})')
 
-def cal_ref(wer,bitwidth_max,dis_max,dis_min,power_max,power_min,I_max,I_min,N_us,B_u,N0,V,k,c0,s):
+def cal_ref(wer,bitwidth_max,resource_max,resource_min,dis_max,dis_min,power_max,power_min,I_max,I_min,N_us,B_u,N0,V,k,c0,s):
     h_min = wer/(dis_max**2)
     h_max = wer/(dis_min**2)
-    Tmax_ref = s + max(N_us)*c0/3e7 + (bitwidth_max*V+64+V)/data_rate(power_min,B_u,h_min,N0,I_max)
-    Emax_ref = k*(8e7)**2*max(N_us)*c0+(bitwidth_max*V+64+V)*power_max/data_rate(power_min,B_u,h_min,N0,I_max)
-    Tmin_ref = s + min(N_us)*c0/8e7 + (1*V+64+V)/data_rate(power_max,B_u,h_max,N0,I_min)
-    Emin_ref = k*(3e7)**2*min(N_us)*c0+(1*V+64+V)*power_min/data_rate(power_max,B_u,h_max,N0,I_min)
+    Tmax_ref = s + max(N_us)*c0/resource_min + (bitwidth_max*V+64+V)/data_rate(power_min,B_u,h_min,N0,I_max)
+    Emax_ref = k*(resource_max)**2*max(N_us)*c0+(bitwidth_max*V+64+V)*power_max/data_rate(power_min,B_u,h_min,N0,I_max)
+    Tmin_ref = s + min(N_us)*c0/resource_max + (1*V+64+V)/data_rate(power_max,B_u,h_max,N0,I_min)
+    Emin_ref = k*(resource_min)**2*min(N_us)*c0+(1*V+64+V)*power_min/data_rate(power_max,B_u,h_max,N0,I_min)
     print(f'当前T范围:({Tmin_ref},{Tmax_ref}), 当前E范围:({Emin_ref},{Emax_ref})')
 
     with open(f'referce.txt', 'w') as f:
@@ -340,19 +340,24 @@ def adjust(bitwidths,prune_rates,power,I_us,h_us,g_maxs,g_mins,computing_resourc
 
     time_ = 1
     # 深拷贝，用于判断是否收敛
-    b = bitwidths
-    r = prune_rates
-    p = power
+    # b = copy.deepcopy(bitwidths)
+    # r = copy.deepcopy(prune_rates)
+    # p = copy.deepcopy(power)
     # check = Gamma(r,b,p, g_maxs, g_mins, h_us, I_us)
-    best_power = p
-    best_bitwidth = b
-    best_prune_rate = r
+    bitwidths = [8 for i in range(num_clients)]
+    prune_rates = [random.uniform(prune_rate_min, prune_rate_max) for i in range(num_clients)]
+    power = [random.uniform(power_min, power_max) for i in range(num_clients)]
+    # power = [0.1 for i in range(num_clients)]
+
+    best_power = copy.deepcopy(bitwidths)
+    best_bitwidth = copy.deepcopy(prune_rates)
+    best_prune_rate = copy.deepcopy(power)
     best_Gamma = 1e9
     # while abs(Gamma(r,b,p, g_max, g_min, h_us, I_us)-Gamma(prune_rates,bitwidths,power, g_max, g_min, h_us, I_us)) > threshold:
     for e in range(bcd_epoch):
-        b = copy.deepcopy(bitwidths)
-        r = copy.deepcopy(prune_rates)
-        p = copy.deepcopy(power)
+        # b = copy.deepcopy(bitwidths)
+        # r = copy.deepcopy(prune_rates)
+        # p = copy.deepcopy(power)
         print('当前块坐标下降轮次：',time_)
         
         time_ += 1
@@ -400,6 +405,7 @@ def adjust(bitwidths,prune_rates,power,I_us,h_us,g_maxs,g_mins,computing_resourc
             print('至少有满足Tmax的解')
         else:
             print('无可行解!')
+
         #   break
         for i in range(num_clients):
             if p_min[i] >= power_max:
@@ -408,24 +414,7 @@ def adjust(bitwidths,prune_rates,power,I_us,h_us,g_maxs,g_mins,computing_resourc
                 p_min[i] = power_min
         namespace = ['p'+str(i) for i in range(num_clients)]
         space = [Real(p_min[i],power_max,name=namespace[i]) for i in range(num_clients)]
-        # if num_clients==5:
-        #     space = [Real(p_min[0],power_max,name='p0'), Real(p_min[1],power_max,name='p1'), Real(p_min[2],power_max,name='p2'), Real(p_min[3],power_max,name='p3'), Real(p_min[4],power_max,name='p4')]
-        # elif num_clients==3:
-        #     space = [Real(p_min[0],power_max,name='p0'), Real(p_min[1],power_max,name='p1'), Real(p_min[2],power_max,name='p2')]
-        # elif num_clients==4:
-        #     space = [Real(p_min[0],power_max,name='p0'), Real(p_min[1],power_max,name='p1'), Real(p_min[2],power_max,name='p2'), Real(p_min[3],power_max,name='p3')]
-        # elif num_clients==7:
-        #     space = [Real(p_min[0],power_max,name='p0'), Real(p_min[1],power_max,name='p1'), Real(p_min[2],power_max,name='p2'), Real(p_min[3],power_max,name='p3'), Real(p_min[4],power_max,name='p4'),\
-        #                 Real(p_min[5],power_max,name='p5'), Real(p_min[6],power_max,name='p6')]
-        # elif num_clients==10:
-        #     space = [Real(p_min[0],power_max,name='p0'), Real(p_min[1],power_max,name='p1'), Real(p_min[2],power_max,name='p2'), Real(p_min[3],power_max,name='p3'), Real(p_min[4],power_max,name='p4'),\
-        #              Real(p_min[5],power_max,name='p5'), Real(p_min[6],power_max,name='p6'), Real(p_min[7],power_max,name='p7'), Real(p_min[8],power_max,name='p8'), Real(p_min[9],power_max,name='p9')]
-        # elif num_clients==15:
-        #     space = [Real(p_min[0],power_max,name='p0'), Real(p_min[1],power_max,name='p1'), Real(p_min[2],power_max,name='p2'), Real(p_min[3],power_max,name='p3'), Real(p_min[4],power_max,name='p4'),\
-        #              Real(p_min[5],power_max,name='p5'), Real(p_min[6],power_max,name='p6'), Real(p_min[7],power_max,name='p7'), Real(p_min[8],power_max,name='p8'), Real(p_min[9],power_max,name='p9'),\
-        #              Real(p_min[10],power_max,name='p10'), Real(p_min[11],power_max,name='p11'), Real(p_min[12],power_max,name='p12'), Real(p_min[13],power_max,name='p13'), Real(p_min[14],power_max,name='p14')]
         
-
         opt = Optimizer(space, base_estimator="GP", random_state=0, acq_func=acq_func)
         n_calls = BO_epoch
         BO_results = []
@@ -733,20 +722,20 @@ def record_condition(save_path,vers,I_us,computing_resources,distance,h_us):
         f.write('h_us:'+str(h_us)+'\n')
 
 def plot_exp2_bar(save_path, file_path, num_1, num_2, num_3, file_fedsgd, file_signsgd, file_fedavg, file_proposed,file_name):
-    data_T_fedsgd_1, data_E_fedsgd_1 = read_TE(file_path+'num_1/'+file_fedsgd)
-    data_T_signsgd_1, data_E_signsgd_1 = read_TE(file_path+'num_1/'+file_signsgd)
-    data_T_fedavg_1, data_E_fedavg_1 = read_TE(file_path+'num_1/'+file_fedavg)
-    data_T_proposed_1, data_E_proposed_1 = read_TE(file_path+'num_1/'+file_proposed)
+    data_T_fedsgd_1, data_E_fedsgd_1 = read_TE(file_path+'num_1/FEDSGD/'+file_fedsgd)
+    data_T_signsgd_1, data_E_signsgd_1 = read_TE(file_path+'num_1/SIGNSGD/'+file_signsgd)
+    data_T_fedavg_1, data_E_fedavg_1 = read_TE(file_path+'num_1/FEDAVG/'+file_fedavg)
+    data_T_proposed_1, data_E_proposed_1 = read_TE(file_path+'num_1/PROPOSED/'+file_proposed)
 
-    data_T_fedsgd_2, data_E_fedsgd_2 = read_TE(file_path+'num_2/'+file_fedsgd)
-    data_T_signsgd_2, data_E_signsgd_2 = read_TE(file_path+'num_2/'+file_signsgd)
-    data_T_fedavg_2, data_E_fedavg_2 = read_TE(file_path+'num_2/'+file_fedavg)
-    data_T_proposed_2, data_E_proposed_2 = read_TE(file_path+'num_2/'+file_proposed)
+    data_T_fedsgd_2, data_E_fedsgd_2 = read_TE(file_path+'num_2/FEDSGD/'+file_fedsgd)
+    data_T_signsgd_2, data_E_signsgd_2 = read_TE(file_path+'num_2/SIGNSGD/'+file_signsgd)
+    data_T_fedavg_2, data_E_fedavg_2 = read_TE(file_path+'num_2/FEDAVG/'+file_fedavg)
+    data_T_proposed_2, data_E_proposed_2 = read_TE(file_path+'num_2/PROPOSED/'+file_proposed)
 
-    data_T_fedsgd_3, data_E_fedsgd_3 = read_TE(file_path+'num_3/'+file_fedsgd)
-    data_T_signsgd_3, data_E_signsgd_3 = read_TE(file_path+'num_3/'+file_signsgd)
-    data_T_fedavg_3, data_E_fedavg_3 = read_TE(file_path+'num_3/'+file_fedavg)
-    data_T_proposed_3, data_E_proposed_3 = read_TE(file_path+'num_3/'+file_proposed)
+    data_T_fedsgd_3, data_E_fedsgd_3 = read_TE(file_path+'num_3/FEDSGD/'+file_fedsgd)
+    data_T_signsgd_3, data_E_signsgd_3 = read_TE(file_path+'num_3/SIGNSGD/'+file_signsgd)
+    data_T_fedavg_3, data_E_fedavg_3 = read_TE(file_path+'num_3/FEDAVG/'+file_fedavg)
+    data_T_proposed_3, data_E_proposed_3 = read_TE(file_path+'num_3/PROPOSED/'+file_proposed)
 
     proposed = [data_T_proposed_1[2], data_T_proposed_2[2], data_T_proposed_3[2]]                  # Proposed 2.0 1.5 0.006
     fedavg = [data_T_fedavg_1[2],data_T_fedavg_2[2],data_T_fedavg_3[2]]               # SGD 2. 1.5
