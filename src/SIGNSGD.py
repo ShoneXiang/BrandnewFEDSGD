@@ -47,7 +47,7 @@ class Server:
     # 梯度聚合
     def aggregate(self, gradients, alpha):
         avg_gradients = copy.deepcopy(gradients[0])
-        alpha_weight = [self.N_us[i]*alpha[i] for i in range(len(gradients)+1)]
+        alpha_weight = [self.N_us[i]*alpha[i] for i in range(len(gradients))]
         alpha_weight = [i/sum(alpha_weight) for i in alpha_weight]
         if torch.all(alpha==0):
             print('alpha all zero')

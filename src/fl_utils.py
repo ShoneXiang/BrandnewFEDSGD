@@ -566,7 +566,7 @@ def plot_multi_converg(args, save_path, file_fedsgd, file_signsgd, file_fedavg, 
     index_values_fedavg, losses_train_fedavg, accuracies_train_fedavg, accuracies_test_fedavg = read_converg(file_fedavg)
     index_values_proposed, losses_train_proposed, accuracies_train_proposed, accuracies_test_proposed = read_converg(file_proposed)
 
-    font_size = 30
+    font_size = 20
     rcParams.update({'font.size': font_size, 'font.family': 'Times New Roman'})
 
     # 示例输出
@@ -618,6 +618,8 @@ def plot_bar(save_path, file_fedsgd, file_signsgd, file_fedavg, file_proposed, f
     bar_width = 0.15
     rcParams.update({'font.size': font_size, 'font.family': 'Times New Roman'})
 
+    maxlim = max([max(proposed),max(signsgd),max(fedsgd),max(fedavg)])
+
     # 绘图
     plt.figure(figsize=(15, 12))
     plt.bar(np.arange(3), proposed, label='LTFL (Proposed)', color='royalblue', alpha=1, width=bar_width, edgecolor="k", hatch='/')
@@ -631,59 +633,7 @@ def plot_bar(save_path, file_fedsgd, file_signsgd, file_fedavg, file_proposed, f
     plt.xticks(np.arange(3) + 2*bar_width, labels)
     # plt.tick_params(labelsize=20)
     # 设置Y轴的刻度范围
-    plt.ylim([0, 80])
-    plt.grid(True)
-    # 为每个条形图添加数值标签
-    # for x2016, proposed in enumerate(proposed):
-    #     plt.text(x2016, proposed + 2, '%s' % proposed, ha='center', fontsize=font)
-
-    # for x2017, fedsgd in enumerate(fedsgd):
-    #     plt.text(x2017 + bar_width, fedsgd + 2, '%s' % fedsgd, ha='center', fontsize=font)
-
-    # for x2018, signsgd in enumerate(signsgd):
-    #     plt.text(x2018 + 2 * bar_width, signsgd + 2, '%s' % signsgd, ha='center', fontsize=font)
-
-    # for x2019, y2019 in enumerate(Y2019):
-    #     plt.text(x2019 + 3*bar_width, y2019 + 2, '%s' % y2019, ha='center', fontsize=font)
-
-    # for x2020, y2020 in enumerate(Y2020):
-    #     plt.text(x2020 + 4 * bar_width, y2020 + 2, '%s' % y2020, ha='center', fontsize=font)
-
-    # 显示图例
-    # plt.legend(bbox_to_anchor=(0.5, 1), loc=5, borderaxespad=0, fontsize=font)
-    plt.legend(loc='upper left')
-
-    # plt.title("test", fontsize=font)
-    plt.xlabel("Accuracy")
-    plt.ylabel("Energy Consumption(J)")
-    plt.savefig(save_path +'Energy Consumption'+file_name+'.png', dpi=300, format = 'png')
-
-    #显示图形
-    plt.show()
-
-    proposed = [data_E_proposed[1], data_E_proposed[2], data_E_proposed[3]]                  # Proposed 2.0 1.5 0.006
-    fedavg = [data_E_fedavg[1],data_E_fedavg[2],data_E_fedavg[3]]               # SGD 2. 1.5
-    signsgd = [data_E_signsgd[1],data_E_signsgd[2],data_E_signsgd[3]]                # signSGD
-    fedsgd = [data_E_fedsgd[1],data_E_fedsgd[2],data_E_fedsgd[3]]             # avg
-    font_size = 20
-    labels = ['0.6', '0.7', '0.8']
-    bar_width = 0.15
-    rcParams.update({'font.size': font_size, 'font.family': 'Times New Roman'})
-    
-    # 绘图
-    plt.figure(figsize=(15, 12))
-    plt.bar(np.arange(3), proposed, label='LTFL (Proposed)', color='royalblue', alpha=1, width=bar_width, edgecolor="k", hatch='/')
-    plt.bar(np.arange(3) + 3 *bar_width, fedsgd, label=u'FedSGD', color='orange', alpha=1, edgecolor="k",
-            width=bar_width, hatch="o")
-    plt.bar(np.arange(3) + 1 * bar_width, signsgd, label=u'SignSGD', color='limegreen', alpha=1, edgecolor="k",
-            width=bar_width, hatch="x")
-    plt.bar(np.arange(3) + 2 * bar_width, fedavg, label=u'FedAVG', color='saddlebrown', alpha=1, edgecolor="k",
-            width=bar_width, hatch="/")
-    # 添加刻度标签
-    plt.xticks(np.arange(3) + 2*bar_width, labels)
-    # plt.tick_params(labelsize=20)
-    # 设置Y轴的刻度范围
-    plt.ylim([0, 10])
+    plt.ylim([0, math.ceil(maxlim/10)*10])
     plt.grid(True)
     # 为每个条形图添加数值标签
     # for x2016, proposed in enumerate(proposed):
@@ -709,6 +659,60 @@ def plot_bar(save_path, file_fedsgd, file_signsgd, file_fedavg, file_proposed, f
     plt.xlabel("Accuracy")
     plt.ylabel("Delay(s)")
     plt.savefig(save_path +'Delay'+file_name+'.png', dpi=300, format = 'png')
+
+    #显示图形
+    plt.show()
+
+    proposed = [data_E_proposed[1], data_E_proposed[2], data_E_proposed[3]]                  # Proposed 2.0 1.5 0.006
+    fedavg = [data_E_fedavg[1],data_E_fedavg[2],data_E_fedavg[3]]               # SGD 2. 1.5
+    signsgd = [data_E_signsgd[1],data_E_signsgd[2],data_E_signsgd[3]]                # signSGD
+    fedsgd = [data_E_fedsgd[1],data_E_fedsgd[2],data_E_fedsgd[3]]             # avg
+    font_size = 20
+    labels = ['0.6', '0.7', '0.8']
+    bar_width = 0.15
+    rcParams.update({'font.size': font_size, 'font.family': 'Times New Roman'})
+    
+    maxlim = max([max(proposed),max(signsgd),max(fedsgd),max(fedavg)])
+
+    # 绘图
+    plt.figure(figsize=(15, 12))
+    plt.bar(np.arange(3), proposed, label='LTFL (Proposed)', color='royalblue', alpha=1, width=bar_width, edgecolor="k", hatch='/')
+    plt.bar(np.arange(3) + 3 *bar_width, fedsgd, label=u'FedSGD', color='orange', alpha=1, edgecolor="k",
+            width=bar_width, hatch="o")
+    plt.bar(np.arange(3) + 1 * bar_width, signsgd, label=u'SignSGD', color='limegreen', alpha=1, edgecolor="k",
+            width=bar_width, hatch="x")
+    plt.bar(np.arange(3) + 2 * bar_width, fedavg, label=u'FedAVG', color='saddlebrown', alpha=1, edgecolor="k",
+            width=bar_width, hatch="/")
+    # 添加刻度标签
+    plt.xticks(np.arange(3) + 2*bar_width, labels)
+    # plt.tick_params(labelsize=20)
+    # 设置Y轴的刻度范围
+    plt.ylim([0, math.ceil(maxlim/10)*10])
+    plt.grid(True)
+    # 为每个条形图添加数值标签
+    # for x2016, proposed in enumerate(proposed):
+    #     plt.text(x2016, proposed + 2, '%s' % proposed, ha='center', fontsize=font)
+
+    # for x2017, fedsgd in enumerate(fedsgd):
+    #     plt.text(x2017 + bar_width, fedsgd + 2, '%s' % fedsgd, ha='center', fontsize=font)
+
+    # for x2018, signsgd in enumerate(signsgd):
+    #     plt.text(x2018 + 2 * bar_width, signsgd + 2, '%s' % signsgd, ha='center', fontsize=font)
+
+    # for x2019, y2019 in enumerate(Y2019):
+    #     plt.text(x2019 + 3*bar_width, y2019 + 2, '%s' % y2019, ha='center', fontsize=font)
+
+    # for x2020, y2020 in enumerate(Y2020):
+    #     plt.text(x2020 + 4 * bar_width, y2020 + 2, '%s' % y2020, ha='center', fontsize=font)
+
+    # 显示图例
+    # plt.legend(bbox_to_anchor=(0.5, 1), loc=5, borderaxespad=0, fontsize=font)
+    plt.legend(loc='upper left')
+
+    # plt.title("test", fontsize=font)
+    plt.xlabel("Accuracy")
+    plt.ylabel("Energy Consumption(J)")
+    plt.savefig(save_path +'Energy Consumption'+file_name+'.png', dpi=300, format = 'png')
 
     #显示图形
     plt.show()
@@ -747,6 +751,7 @@ def plot_exp2_bar(save_path, file_path, num_1, num_2, num_3, file_fedsgd, file_s
     bar_width = 0.15
     rcParams.update({'font.size': font_size, 'font.family': 'Times New Roman'})
 
+    maxlim = max([max(proposed),max(signsgd),max(fedsgd),max(fedavg)])
     # 绘图
     plt.figure(figsize=(15, 12))
     plt.bar(np.arange(3), proposed, label='LTFL (Proposed)', color='royalblue', alpha=1, width=bar_width, edgecolor="k", hatch='/')
@@ -760,7 +765,7 @@ def plot_exp2_bar(save_path, file_path, num_1, num_2, num_3, file_fedsgd, file_s
     plt.xticks(np.arange(3) + 2*bar_width, labels)
     # plt.tick_params(labelsize=20)
     # 设置Y轴的刻度范围
-    plt.ylim([0, 120])
+    plt.ylim([0, math.ceil(maxlim/10)*10])
     plt.grid(True)
     # 为每个条形图添加数值标签
     # for x2016, proposed in enumerate(proposed):
@@ -799,6 +804,8 @@ def plot_exp2_bar(save_path, file_path, num_1, num_2, num_3, file_fedsgd, file_s
     bar_width = 0.15
     rcParams.update({'font.size': font_size, 'font.family': 'Times New Roman'})
     
+    maxlim = max([max(proposed),max(signsgd),max(fedsgd),max(fedavg)])
+
     # 绘图
     plt.figure(figsize=(15, 12))
     plt.bar(np.arange(3), proposed, label='LTFL (Proposed)', color='royalblue', alpha=1, width=bar_width, edgecolor="k", hatch='/')
@@ -812,7 +819,7 @@ def plot_exp2_bar(save_path, file_path, num_1, num_2, num_3, file_fedsgd, file_s
     plt.xticks(np.arange(3) + 2*bar_width, labels)
     # plt.tick_params(labelsize=20)
     # 设置Y轴的刻度范围
-    plt.ylim([0, 120])
+    plt.ylim([0, math.ceil(maxlim/10)*10])
     plt.grid(True)
     # 为每个条形图添加数值标签
     # for x2016, proposed in enumerate(proposed):

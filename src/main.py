@@ -58,8 +58,8 @@ parser.add_argument('--num_epoch', type=int, help='num_epoch是每轮全局迭�
 parser.add_argument('--mean_datanum', type=int, help='节点平均的数据量', default=500)
 
 parser.add_argument('--wer', type=float, help='wer是信道条件Rayleigh fading factor', default=0.0065)                                                     
-parser.add_argument('--Tmax', type=float, help='Tmax是每轮全局迭代的最大时延(约束条件)', default=0.15)     
-parser.add_argument('--Emax', type=float, help='Emax是每轮全局迭代的最大能耗(约束条件)', default=0.035)      
+parser.add_argument('--Tmax', type=float, help='Tmax是每轮全局迭代的最大时延(约束条件)', default=0.2)     
+parser.add_argument('--Emax', type=float, help='Emax是每轮全局迭代的最大能耗(约束条件)', default=0.03)      
 parser.add_argument('--num_clients', type=int, help='num_clients是参与训练的节点数量', default=10) 
 
 parser.add_argument('--count_py', type=int, help='count_py是文件名序号,用于扫参数的时候区分随机性', default=1)       
@@ -132,20 +132,20 @@ def main():
     elif args.pattern=='SIGNSGD':
         SIGNSGD.SIGNSGD(args=args, train_dataset=train_dataset, test_dataset=test_dataset, user_groups=user_groups, N_us=N_us, file_path='./SIGNSGD/', transmit_power=ini_transmit_power, bitwidths=[1 for i in range(args.num_clients)], prune_rates=ini_prune_rates,computing_resources=computing_resources, I_us=I_us, h_us=h_us)
         # file_path='./SIGNSGD/', train_dataset=None, test_dataset=None, user_groups=None, num_epoch=100, num_clients=10, learning_rate=0.01, bitwidths=[8 for i in range(10)], prune_rates=[0.5 for i in range(10)], transmit_power=[0.1 for i in range(10)], Tmax=0.1, Emax=0.1, wer=0.1, count_py=0.1, N_us=[100 for i in range(10)], I_us=[1.5e-08 for i in range(10)], h_us=[0.1 for i in range(10)], computing_resources=[6e7 for i in range(10)], c0=200000, s=0.1, waterfall_thre=1, D=0.3, sigma=3, V=62984, B_u=1000000*10, N0=3.98e-21, k=1.25e-26
-        fl_utils.plot_single_converg(args=args, save_path='./SIGNSGD/', file_name=f'./SIGNSGD/LA_AVG_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv')
+        fl_utils.plot_single_converg(args=args, save_path='./SIGNSGD/', file_name=f'./SIGNSGD/LA_SIGNSGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv')
     
     elif args.pattern=='PROPOSED':
         PROPOSED.PROPOSED(args=args, train_dataset=train_dataset, test_dataset=test_dataset, user_groups=user_groups, N_us=N_us, file_path='./PROPOSED/', transmit_power=ini_transmit_power, bitwidths=ini_bitwidths, prune_rates=ini_prune_rates,computing_resources=computing_resources, I_us=I_us, h_us=h_us)
         # file_path='./PROPOSED/', train_dataset=None, test_dataset=None, user_groups=None, num_epoch=100, num_clients=10, learning_rate=0.01, bitwidths=[8 for i in range(10)], prune_rates=[0.5 for i in range(10)], transmit_power=[0.1 for i in range(10)], Tmax=0.1, Emax=0.1, wer=0.1, count_py=0.1, N_us=[100 for i in range(10)], I_us=[1.5e-08 for i in range(10)], h_us=[0.1 for i in range(10)], computing_resources=[6e7 for i in range(10)], c0=200000, s=0.1, waterfall_thre=1, D=0.3, sigma=3, V=62984, B_u=1000000*10, N0=3.98e-21, k=1.25e-26
-        fl_utils.plot_single_converg(args=args, save_path='./PROPOSED/', file_name=f'./PROPOSED/LA_AVG_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv')
+        fl_utils.plot_single_converg(args=args, save_path='./PROPOSED/', file_name=f'./PROPOSED/LA_PROPOSED_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv')
     
     elif args.pattern=='exp1':
         PROPOSED.PROPOSED(args=args, train_dataset=train_dataset, test_dataset=test_dataset, user_groups=user_groups, N_us=N_us, file_path='./exp1/PROPOSED/', transmit_power=ini_transmit_power, bitwidths=ini_bitwidths, prune_rates=ini_prune_rates,computing_resources=computing_resources, I_us=I_us, h_us=h_us)
         SIGNSGD.SIGNSGD(args=args, train_dataset=train_dataset, test_dataset=test_dataset, user_groups=user_groups, N_us=N_us, file_path='./exp1/SIGNSGD/', transmit_power=ini_transmit_power, bitwidths=[1 for i in range(args.num_clients)], prune_rates=ini_prune_rates,computing_resources=computing_resources, I_us=I_us, h_us=h_us)
         MINISGD.FEDSGD(args=args, train_dataset=train_dataset, test_dataset=test_dataset, user_groups=user_groups, N_us=N_us, file_path='./exp1/FEDSGD/', transmit_power=ini_transmit_power, bitwidths=ini_bitwidths, prune_rates=ini_prune_rates,computing_resources=computing_resources, I_us=I_us, h_us=h_us)
         FEDAVG.FEDAVG(args=args, train_dataset=train_dataset, test_dataset=test_dataset, user_groups=user_groups, N_us=N_us, file_path='./exp1/FEDAVG/', transmit_power=ini_transmit_power, bitwidths=ini_bitwidths, prune_rates=ini_prune_rates,computing_resources=computing_resources, I_us=I_us, h_us=h_us)
-        fl_utils.plot_multi_converg(save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/LA_SGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/LA_signSGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/LA_avg_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/LA_PROPOSED_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
-        fl_utils.plot_bar(save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/TE_SGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/TE_signSGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/TE_avg_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/TE_PROPOSED_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
+        fl_utils.plot_multi_converg(args=args, save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/LA_SGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/LA_SIGNSGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/LA_AVG_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/LA_PROPOSED_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
+        fl_utils.plot_bar(save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/TE_SGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/TE_SIGNSGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/TE_AVG_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/TE_PROPOSED_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
         fl_utils.record_condition(save_path='./exp1/',vers=0,I_us=I_us,computing_resources=computing_resources,distance=distance,h_us=h_us)
 
     elif args.pattern=='exp2':
@@ -207,7 +207,7 @@ def main():
         FEDAVG.FEDAVG(args=args, train_dataset=train_dataset, test_dataset=test_dataset, user_groups=user_groups, N_us=N_us, file_path='./exp2/num_3/FEDAVG/', transmit_power=ini_transmit_power, bitwidths=ini_bitwidths, prune_rates=ini_prune_rates,computing_resources=computing_resources, I_us=I_us, h_us=h_us)
         PROPOSED.PROPOSED(args=args, train_dataset=train_dataset, test_dataset=test_dataset, user_groups=user_groups, N_us=N_us, file_path='./exp2/num_3/PROPOSED/', transmit_power=ini_transmit_power, bitwidths=ini_bitwidths, prune_rates=ini_prune_rates,computing_resources=computing_resources, I_us=I_us, h_us=h_us)
         
-        fl_utils.plot_exp2_bar(save_path='./exp2/', file_path='./exp2/',file_fedsgd=f'TE_SGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'TE_signSGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'TE_avg_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'TE_PROPOSED_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv',file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
+        fl_utils.plot_exp2_bar(save_path='./exp2/', file_path='./exp2/',file_fedsgd=f'TE_SGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'TE_SIGNSGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'TE_AVG_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'TE_PROPOSED_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv',file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
       
 
 
@@ -218,8 +218,10 @@ def main():
       
 if __name__ == "__main__":
     start_time = time.time()
-    
-    main()
+    fl_utils.plot_multi_converg(args=args, save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/LA_SGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/LA_SIGNSGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/LA_AVG_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/LA_PROPOSED_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
+    fl_utils.plot_bar(save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/TE_SGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/TE_SIGNSGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/TE_AVG_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/TE_PROPOSED_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
+        
+    # main()
     end_time = time.time()
     execution_time = end_time - start_time
     print("程序运行时间：", execution_time, "秒")
