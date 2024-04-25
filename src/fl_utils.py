@@ -349,9 +349,9 @@ def adjust(bitwidths,prune_rates,power,I_us,h_us,g_maxs,g_mins,computing_resourc
     power = [random.uniform(power_min, power_max) for i in range(num_clients)]
     # power = [0.1 for i in range(num_clients)]
 
-    best_power = copy.deepcopy(bitwidths)
-    best_bitwidth = copy.deepcopy(prune_rates)
-    best_prune_rate = copy.deepcopy(power)
+    best_power = copy.deepcopy(power)
+    best_bitwidth = copy.deepcopy(bitwidths)
+    best_prune_rate = copy.deepcopy(prune_rates)
     best_Gamma = 1e9
     # while abs(Gamma(r,b,p, g_max, g_min, h_us, I_us)-Gamma(prune_rates,bitwidths,power, g_max, g_min, h_us, I_us)) > threshold:
     for e in range(bcd_epoch):
@@ -378,7 +378,14 @@ def adjust(bitwidths,prune_rates,power,I_us,h_us,g_maxs,g_mins,computing_resourc
                 prune_rates[i] = prune_rate_min
             else:
                 prune_rates[i] = 1-min_1[i]
-        
+        for i in range(num_clients):
+            prune_rates[i] = 1-min_1[i]
+            
+            if prune_rates[i] >= prune_rate_max:
+                prune_rates[i] = prune_rate_max
+            elif prune_rates[i] <= prune_rate_min:
+                prune_rates[i] = prune_rate_min
+            
 
         # update bitwidths
 
@@ -404,8 +411,9 @@ def adjust(bitwidths,prune_rates,power,I_us,h_us,g_maxs,g_mins,computing_resourc
         if np.all(p_min<=power_max):
             print('至少有满足Tmax的解')
         else:
-            print('无可行解!')
-
+            print('在此时的约束条件、剪枝率和量化比特下, power无可行解!')
+            for i in range(num_clients):
+                p_min=power_max
         #   break
         for i in range(num_clients):
             if p_min[i] >= power_max:

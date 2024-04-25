@@ -40,7 +40,7 @@ parser.add_argument('--if_prune', type=int, help='是否prune', default=0)
 parser.add_argument('--if_quantize', type=int, help='是否quantize', default=0)
 parser.add_argument('--if_one_hot', type=int, help='是否独热编码，目前这个参数没用', default=0)
 parser.add_argument('--if_SCG', type=int, help='是否使用SCG, 注意不能与MINIbatchSGD一起用,还没写', default=1)
-parser.add_argument('--pattern', type=str, help='pattern', default='exp1')
+parser.add_argument('--pattern', type=str, help='pattern', default='PROPOSED')
 '''
 pattarn:
     FEDSGD:单独进行FEDSGD算法
@@ -58,7 +58,7 @@ parser.add_argument('--num_epoch', type=int, help='num_epoch是每轮全局迭�
 parser.add_argument('--mean_datanum', type=int, help='节点平均的数据量', default=500)
 
 parser.add_argument('--wer', type=float, help='wer是信道条件Rayleigh fading factor', default=0.0065)                                                     
-parser.add_argument('--Tmax', type=float, help='Tmax是每轮全局迭代的最大时延(约束条件)', default=0.2)     
+parser.add_argument('--Tmax', type=float, help='Tmax是每轮全局迭代的最大时延(约束条件)', default=0.16)     
 parser.add_argument('--Emax', type=float, help='Emax是每轮全局迭代的最大能耗(约束条件)', default=0.03)      
 parser.add_argument('--num_clients', type=int, help='num_clients是参与训练的节点数量', default=10) 
 
@@ -85,7 +85,7 @@ parser.add_argument('--power_max', type=float, help='power_max', default=0.1)
 parser.add_argument('--bitwidth_min', type=int, help='bitwidth_min', default=1)
 parser.add_argument('--bitwidth_max', type=int, help='bitwidth_max', default=8)
 parser.add_argument('--prune_rate_min', type=float, help='prune_rate_min', default=0.0)
-parser.add_argument('--prune_rate_max', type=float, help='prune_rate_max', default=0.0)
+parser.add_argument('--prune_rate_max', type=float, help='prune_rate_max', default=0.5)
 parser.add_argument('--resource_min', type=float, help='resource_min', default=2e8)
 parser.add_argument('--resource_max', type=float, help='resource_max', default=5e8)
 
@@ -218,10 +218,10 @@ def main():
       
 if __name__ == "__main__":
     start_time = time.time()
-    fl_utils.plot_multi_converg(args=args, save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/LA_SGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/LA_SIGNSGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/LA_AVG_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/LA_PROPOSED_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
-    fl_utils.plot_bar(save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/TE_SGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/TE_SIGNSGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/TE_AVG_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/TE_PROPOSED_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
+    # fl_utils.plot_multi_converg(args=args, save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/LA_SGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/LA_SIGNSGD_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/LA_AVG_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/LA_PROPOSED_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
+    # fl_utils.plot_bar(save_path='./exp1/', file_fedsgd=f'./exp1/FEDSGD/TE_SGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_signsgd=f'./exp1/SIGNSGD/TE_SIGNSGD_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_fedavg=f'./exp1/FEDAVG/TE_AVG_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_proposed=f'./exp1/PROPOSED/TE_PROPOSED_step_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}.csv', file_name=f'_T{args.Tmax}_E{args.Emax}_w{args.wer}_c{args.count_py}')
         
-    # main()
+    main()
     end_time = time.time()
     execution_time = end_time - start_time
     print("程序运行时间：", execution_time, "秒")
